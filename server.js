@@ -1,8 +1,11 @@
-import express from 'express';
-import dotenv from 'dotenv';
-import morgan from 'morgan';
-import colors from 'colors';
-import connectDB from './config/db.js';
+const path = require('path');
+const express = require('express');
+const dotenv = require('dotenv');
+const morgan = require('morgan');
+const colors = require('colors');
+const fileUpload = require('express-fileupload');
+const errorHandler = require('./middleware/error');
+const connectDB = require('./config/db');
 
 //LOAD ENV VARS
 dotenv.config({ path: './config/config.env' });
@@ -12,7 +15,8 @@ dotenv.config({ path: './config/config.env' });
 connectDB();
 
 //Route files
-import bootcamps from './routes/bootcamps.js';
+const bootcamps = require('./routes/bootcamps');
+const courses = require('./routes/courses');
 
 const app = express();
 
@@ -24,8 +28,17 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
+//FIle uploading
+app.use(fileUpload());
+
+// set static folder
+app.use(express.static(path.join(__dirname, 'public')));
+
 //MOUNT ROUTERS
 app.use('/api/v1/bootcamps', bootcamps);
+app.use('/api/v1/courses', courses);
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
