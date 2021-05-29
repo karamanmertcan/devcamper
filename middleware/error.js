@@ -29,6 +29,16 @@ const errorHandler = (err, req, res, next) => {
     success: false,
     error: error.message || 'Server error',
   });
+
+  if (err.name === 'JsonWebToken') {
+    error = new ErrorResponse('Not authorized', 401);
+    return error;
+  }
+
+  if (err.name === 'TokenExpiredError') {
+    const message = `Please log in again`;
+    error = new ErrorResponse(message, 401);
+  }
 };
 
 module.exports = errorHandler;
